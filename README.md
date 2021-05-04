@@ -12,7 +12,7 @@ Code & Related Files:
 * __DataPacketRecieved.json__: Sample data packet received from the website.  
   
 ============================================================================  
-Suggestions:
+Suggestions:  
 Created my mailing list using google forms, and saved the data in the form of a CSV that could be accessed by the program. I then scheduled the code to be run every hour, to prevent increasing the load on the website and yet be updated incase of any changes in the availability. The code has also been hosted on pythonanywhere.com, which runs once everyday at 08:00 IST - incase the main server shuts down for some reason.
   
 
