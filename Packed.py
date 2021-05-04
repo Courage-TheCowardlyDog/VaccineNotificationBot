@@ -95,6 +95,7 @@ def main():
                 sendMail(alert, receiver_email, message) #Send Mail
                 df.at[i,"LastSent"] = today
                 df.at[i,"Mailcount"] = int(df.at[i,"Mailcount"])+1
+                df.to_csv("Contacts.csv",index=False,header = True)
     
     print("This program took", time.time() - start_time, "to run")
 
