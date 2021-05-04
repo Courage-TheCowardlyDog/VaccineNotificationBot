@@ -48,10 +48,10 @@ def getMessage(alert, receiver_email, receiver_name):
     message["Subject"] = "Your Friendly Vaccine Availability Reminder"
     message["From"] = "notificationvaccine@gmail.com"
     message["To"] = receiver_email
-
+    booked = "\nDon't forget to book your slot at https://www.cowin.gov.in/home"
     message_body = """\
     Hi {0}!
-    The vaccine is now available at the following centres for the 18+ Age Group:\n""".format(receiver_name)+text
+    The vaccine is now available at the following centres for the 18+ Age Group:\n""".format(receiver_name)+text+booked
     
     part1 = MIMEText(message_body, "plain")
     message.attach(part1)
