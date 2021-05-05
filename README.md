@@ -1,6 +1,6 @@
 # VaccineNotificationBot
 
-While the government has announced the vaccination drive to be opened for everyone above the age of 18, the vaccine availibility has been an area of concern - as the suppply fails to meet the huge demands. As the rgistration has been made mandatory by the government, I came up with the idea of this bot to help the people in my circle register for the vaccine as soon as its available.
+While the government has announced the vaccination drive to be opened for everyone above the age of 18, the vaccine availability has been an area of concern - as the supply fails to meet the huge demands. As the registration has been made mandatory by the government, I came up with the idea of this bot to help the people in my circle register for the vaccine as soon as it is available.
 
 **A bot that scrapes the government's portal https://www.cowin.gov.in/home, checks for the availability of the vaccine in centres near you and mails you as soon as the website data gets updated.** 
    
