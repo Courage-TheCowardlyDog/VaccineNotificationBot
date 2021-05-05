@@ -8,66 +8,76 @@ pd.options.mode.chained_assignment = None
 start_time = time.time()
 
 def getdata_Cowin(pin):
-    today = date.today()
-    d1 = today.strftime("%d-%m-%Y")
+    try:
+        today = date.today()
+        d1 = today.strftime("%d-%m-%Y")
 
-    headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
-            'content-type': 'application/json; charset=UTF-8'}
+        headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+                'content-type': 'application/json; charset=UTF-8'}
 
-    params = {"pincode": pin, "date":d1}
+        params = {"pincode": pin, "date":d1}
 
-    start_url = 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin'
-    response = requests.get(start_url, params = params, headers = headers, timeout = 20)
-    data = response.json()
-    print("Data Retrieved")
-    return data
+        start_url = 'https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin'
+        response = requests.get(start_url, params = params, headers = headers, timeout = 20)
+        data = response.json()
+        #print("Data Retrieved.")
+        return data
+    except:
+        print("Error running getData_Cowin() Function.")
 
 def getCentres(data,age):
-    alert = []
+    try:
+        alert = []
 
-    centres = data["centers"]
+        centres = data["centers"]
 
-    for centre in centres:
-        for session in centre["sessions"]:
-            if session["available_capacity"]>0 and session["min_age_limit"] == 18: #session["vaccine"] == "COVISHIELD" OR 'COVAXIN'
-                name = centre["name"]
-                address = centre["address"]
-                date = session["date"]
-                v = session["vaccine"]
-                dump = {"Name":name,"Address":address,"Date":date,"Vaccine":v,"Capacity":session["available_capacity"]}
-                alert.append(dump)
-    return alert
+        for centre in centres:
+            for session in centre["sessions"]:
+                if session["available_capacity"]>0 and session["min_age_limit"] == age: #session["vaccine"] == "COVISHIELD" OR 'COVAXIN'
+                    name = centre["name"]
+                    address = centre["address"]
+                    date = session["date"]
+                    v = session["vaccine"]
+                    dump = {"Name":name,"Address":address,"Date":date,"Vaccine":v,"Capacity":session["available_capacity"]}
+                    alert.append(dump)
+        return alert
+    except:
+        print("Error running getCentres() Function.")
 
 def getMessage(alert, receiver_email, receiver_name,age):
-    text = ""
-    for dumped in alert:
-        pretty_dict_str = json.dumps(dumped, indent=4)
-        text = text + pretty_dict_str + "\n"
-    
-    message = MIMEMultipart("alternative")
-    message["Subject"] = "Your Friendly Vaccine Availability Reminder"
-    message["From"] = "notificationvaccine@gmail.com"
-    message["To"] = receiver_email
-    booked = "\nDon't forget to book your slot at https://www.cowin.gov.in/home"
-    message_body = """Hi {0}!\nDon't forget to book your slot at https://www.cowin.gov.in/home \nThe vaccine is now available at the following centres for the {1}+ Age Group:\n""".format(receiver_name,age)+text
-    
-    part1 = MIMEText(message_body, "plain")
-    message.attach(part1)
-    return message.as_string()
-
+    try:
+        text = ""
+        for dumped in alert:
+            pretty_dict_str = json.dumps(dumped, indent=4)
+            text = text + pretty_dict_str + "\n"
+        
+        message = MIMEMultipart("alternative")
+        message["Subject"] = "Your Friendly Vaccine Availability Reminder"
+        message["From"] = "notificationvaccine@gmail.com"
+        message["To"] = receiver_email
+        
+        message_body = """Hi {0}!\nDon't forget to book your slot at https://www.cowin.gov.in/home \nThe vaccine is now available at the following centres for the {1}+ Age Group:\n""".format(receiver_name,age)+text
+        
+        part1 = MIMEText(message_body, "plain")
+        message.attach(part1)
+        return message.as_string()
+    except:
+        print("Error running getMessage() Function.")
 def sendMail(alert,receiver_email,message):
-    
-    port = 465
-    context = ssl.create_default_context()
+    try:
+        port = 465
+        context = ssl.create_default_context()
 
-    smtp_server = "smtp.gmail.com"
-    sender_email = "my@gmail.com"  #Enter the username which you'll be using to send the mails.
-    password = "" #Enter the password to authenticate the Login Request.
+        smtp_server = "smtp.gmail.com"
+        sender_email = "my@gmail.com"  #Enter the username which you'll be using to send the mails.
+        password = "" #Enter the password to authenticate the Login Request.
     
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-        server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, message)
-        print("Mail Sent")
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, message)
+            print("Mail Sent to:", receiver_email)
+    except:
+        print("Error running sendMail() Function.")
 
 def main():
     filepath = "Contacts.csv" #Get details from the Mailing List.
@@ -89,14 +99,17 @@ def main():
             alert = getCentres(data, age) #Filter down the data as per Age requirements
 
             if alert != []:
-                message = getMessage(alert, receiver_email, receiver_name, age) #Create Message String
+                message = getMessage(alert, receiver_email, receiver_name,age) #Create Message String
                 sendMail(alert, receiver_email, message) #Send Mail
                 df.at[i,"LastSent"] = today
-                df.at[i,"Mailcount"] = int(df.at[i,"Mailcount"])+1
-                df.to_csv("Contacts.csv",index=False,header = True)
+                df.at[i,"Mailcount"]= int(df.at[i,"Mailcount"])+1 
+                df.to_csv(filepath,index=False,header = True)
+            else:
+                print("\nThe vaccine is not yet available near", receiver_name)
     
     print("This program took", time.time() - start_time, "to run")
 
 if __name__ == '__main__':
     main()
-
+    myFile = open(r'D:\Users\Rijul\Documents\Coding\Vaccine\Log.txt', 'a') 
+    myFile.write('\nAccessed on ' + str(datetime.now())) #Checking if Cron is working.
