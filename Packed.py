@@ -38,7 +38,7 @@ def getCentres(data,age):
                 alert.append(dump)
     return alert
 
-def getMessage(alert, receiver_email, receiver_name):
+def getMessage(alert, receiver_email, receiver_name,age):
     text = ""
     for dumped in alert:
         pretty_dict_str = json.dumps(dumped, indent=4)
@@ -49,9 +49,7 @@ def getMessage(alert, receiver_email, receiver_name):
     message["From"] = "notificationvaccine@gmail.com"
     message["To"] = receiver_email
     booked = "\nDon't forget to book your slot at https://www.cowin.gov.in/home"
-    message_body = """\
-    Hi {0}!
-    The vaccine is now available at the following centres for the 18+ Age Group:\n""".format(receiver_name)+text+booked
+    message_body = """Hi {0}!\nDon't forget to book your slot at https://www.cowin.gov.in/home \nThe vaccine is now available at the following centres for the {1}+ Age Group:\n""".format(receiver_name,age)+text
     
     part1 = MIMEText(message_body, "plain")
     message.attach(part1)
@@ -91,7 +89,7 @@ def main():
             alert = getCentres(data, age) #Filter down the data as per Age requirements
 
             if alert != []:
-                message = getMessage(alert, receiver_email, receiver_name) #Create Message String
+                message = getMessage(alert, receiver_email, receiver_name, age) #Create Message String
                 sendMail(alert, receiver_email, message) #Send Mail
                 df.at[i,"LastSent"] = today
                 df.at[i,"Mailcount"] = int(df.at[i,"Mailcount"])+1
