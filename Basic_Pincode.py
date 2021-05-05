@@ -49,10 +49,11 @@ if alert != []:
     message["Subject"] = "Your Friendly Vaccine Availability Reminder"
     message["From"] = sender_email
     message["To"] = receiver_email
-    booked = "\nDon't forget to book your slot at https://www.cowin.gov.in/home"
+    
     message_body = """\
     Hi !
-    The vaccine is now available at the following centres for the 18+ Age Group:\n"""+text+booked
+    Don't forget to book your slot at https://www.cowin.gov.in/home
+    The vaccine is now available at the following centres for the 18+ Age Group:\n"""+text
     
     part1 = MIMEText(message_body, "plain")
     message.attach(part1)
