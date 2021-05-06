@@ -11,8 +11,12 @@ Code & Related Files:
 * __Contacts.csv__: *Mailing List* Commma Separated Value file which contains: Name, Email, Pincode, AgeGroup, MailLastSent (date), MailCount.  
 * __DataPacketRecieved.json__: Sample data packet received from the website.  
   
-============================================================================  
-Suggestions:  
-Created my mailing list using google forms, and saved the data in the form of a CSV that could be accessed by the program. I then scheduled the code to be run every hour, to prevent increasing the load on the website and yet be updated incase of any changes in the availability. The code has also been hosted on pythonanywhere.com, which runs once everyday at 08:00 IST - incase the main server shuts down for some reason.
+=============================================================================  
+Implementation:
+* Created mailing list using google forms (https://forms.gle/u7xxzDsmj2sxgapq7). Automated the export to a CSV to be accessed by the code.  
+* Made a Batch file to run the Python Code, linked the Batch file to a .vbs script to enable it being run in the background.  
+* Used the Windows Task Scheduler to trigger the .vbs script every 10 minutes.  
+* Checked the log for any error being printed.
+* The code has also been hosted on pythonanywhere.com, which runs once everyday at 08:00 IST - incase the main server shuts down for some reason.
   
 
