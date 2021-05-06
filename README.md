@@ -1,4 +1,4 @@
-C# VaccineNotificationBot
+# VaccineNotificationBot
 
 While the government has announced the vaccination drive to be opened for everyone above the age of 18, the vaccine availability has been an area of concern - as the supply fails to meet the huge demands. As the registration has been made mandatory by the government, I came up with the idea of this bot to help the people in my circle register for the vaccine as soon as it is available.
 
