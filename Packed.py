@@ -28,18 +28,37 @@ def getdata_Cowin(pin):
 def getCentres(data,age):
     try:
         alert = []
-
         centres = data["centers"]
 
         for centre in centres:
-            for session in centre["sessions"]:
-                if session["available_capacity"]>0 and session["min_age_limit"] == age: #session["vaccine"] == "COVISHIELD" OR 'COVAXIN'
-                    name = centre["name"]
-                    address = centre["address"]
-                    date = session["date"]
-                    v = session["vaccine"]
-                    dump = {"Name":name,"Address":address,"Date":date,"Vaccine":v,"Capacity":session["available_capacity"]}
-                    alert.append(dump)
+            for session in centre["sessions"]: #Session == Date 
+                if vchoice == "ANY":
+                    if session["available_capacity"] > 0 and session["min_age_limit"] == age:
+                        name = centre["name"]
+                        address = centre["address"]
+                        date = session["date"]
+                        v = session["vaccine"]
+                        dump = {"Name": name, "Address": address, "Date": date,
+                                "Vaccine": v, "Capacity": session["available_capacity"]}
+                        alert.append(dump)
+                elif vchoice == "COVAXIN":
+                    if session["available_capacity"] > 0 and session["min_age_limit"] == age and session["vaccine"] == "COVAXIN":
+                        name = centre["name"]
+                        address = centre["address"]
+                        date = session["date"]
+                        v = session["vaccine"]
+                        dump = {"Name": name, "Address": address, "Date": date,
+                                "Vaccine": v, "Capacity": session["available_capacity"]}
+                        alert.append(dump)
+                elif vchoice == "COVISHIELD":
+                    if session["available_capacity"] > 0 and session["min_age_limit"] == age and session["vaccine"] == "COVISHIELD":
+                        name = centre["name"]
+                        address = centre["address"]
+                        date = session["date"]
+                        v = session["vaccine"]
+                        dump = {"Name": name, "Address": address, "Date": date,
+                                "Vaccine": v, "Capacity": session["available_capacity"]}
+                        alert.append(dump)
         return alert
     except:
         print("Error running getCentres() Function.")
@@ -63,6 +82,7 @@ def getMessage(alert, receiver_email, receiver_name,age):
         return message.as_string()
     except:
         print("Error running getMessage() Function.")
+        
 def sendMail(alert,receiver_email,message):
     try:
         port = 465
@@ -74,8 +94,11 @@ def sendMail(alert,receiver_email,message):
     
     with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
             server.login(sender_email, password)
-            server.sendmail(sender_email, receiver_email, message)
-            print("Mail Sent to:", receiver_email)
+            check = server.sendmail(sender_email, receiver_email, message)
+            mailsent+=1
+            print("\nMail Sent to:", receiver_email)
+            server.quit()
+            return check
     except:
         print("Error running sendMail() Function.")
 
@@ -94,16 +117,23 @@ def main():
             receiver_email = df.at[i,"Email"]
             pin = df.at[i,'Pincode']
             age = df.at[i,"Agegroup"]
+            vchoice = df.at[i, "Vchoice"]
 
             data = getdata_Cowin(pin) #Request Data from https://www.cowin.gov.in/home for the PinCode 
-            alert = getCentres(data, age) #Filter down the data as per Age requirements
+            alert = getCentres(data, age, vchoice) #Filter down the data as per Age requirements
 
             if alert != []:
-                message = getMessage(alert, receiver_email, receiver_name,age) #Create Message String
-                sendMail(alert, receiver_email, message) #Send Mail
-                df.at[i,"LastSent"] = today
-                df.at[i,"Mailcount"]= int(df.at[i,"Mailcount"])+1 
-                df.to_csv(filepath,index=False,header = True)
+                # Create Message String
+                message = getMessage(alert, receiver_email, receiver_name, age)
+                # Send Mail
+                check = sendMail(alert, receiver_email, message)  
+                if check == {}:
+                    df.at[i, "LastSent"] = today
+                    df.at[i, "Mailcount"] = int(df.at[i, "Mailcount"])+1
+                    df.to_csv("Contacts_Testing.csv", index=False, header=True)
+                else:
+                    print("Mail couldn't be sent to: "+ receiver_name + " at: " + receiver_email)
+
             else:
                 print("\nThe vaccine is not yet available near", receiver_name)
     
@@ -112,4 +142,4 @@ def main():
 if __name__ == '__main__':
     main()
     myFile = open(r'D:\Users\Rijul\Documents\Coding\Vaccine\Log.txt', 'a') 
-    myFile.write('\nAccessed on ' + str(datetime.now())) #Checking if Cron is working.
+    myFile.write('\nAccessed on ' + str(datetime.now()) + " Total Mails sent " + str(mailsent)) #Checking if Cron is working.
