@@ -3,7 +3,10 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import ssl, smtplib, requests, json, csv, time
 import pandas as pd
+import traceback
 
+mailsent = 0
+mailcheck = True
 pd.options.mode.chained_assignment = None
 start_time = time.time()
 
@@ -22,8 +25,9 @@ def getdata_Cowin(pin):
         data = response.json()
         #print("Data Retrieved.")
         return data
-    except:
+    except Exception():
         print("Error running getData_Cowin() Function.")
+        traceback.print_exc()
 
 def getCentres(data,age):
     try:
@@ -60,8 +64,9 @@ def getCentres(data,age):
                                 "Vaccine": v, "Capacity": session["available_capacity"]}
                         alert.append(dump)
         return alert
-    except:
+    except Exception():
         print("Error running getCentres() Function.")
+        traceback.print_exc()
 
 def getMessage(alert, receiver_email, receiver_name,age):
     try:
@@ -80,10 +85,12 @@ def getMessage(alert, receiver_email, receiver_name,age):
         part1 = MIMEText(message_body, "plain")
         message.attach(part1)
         return message.as_string()
-    except:
+    except Exception():
         print("Error running getMessage() Function.")
+        traceback.print_exc()
         
 def sendMail(alert,receiver_email,message):
+    global mailsent
     try:
         port = 465
         context = ssl.create_default_context()
@@ -92,15 +99,17 @@ def sendMail(alert,receiver_email,message):
         sender_email = "my@gmail.com"  #Enter the username which you'll be using to send the mails.
         password = "" #Enter the password to authenticate the Login Request.
     
-    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
-            server.login(sender_email, password)
-            check = server.sendmail(sender_email, receiver_email, message)
-            mailsent+=1
-            print("\nMail Sent to:", receiver_email)
-            server.quit()
-            return check
-    except:
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+                server.login(sender_email, password)
+                check = server.sendmail(sender_email, receiver_email, message)
+                mailsent+=1
+                print("\nMail Sent to:", receiver_email)
+                mailcheck = True
+                server.quit()
+    except Exception():
+        mailcheck = False
         print("Error running sendMail() Function.")
+        traceback.print_exc()
 
 def main():
     filepath = "Contacts.csv" #Get details from the Mailing List.
@@ -127,12 +136,12 @@ def main():
                 message = getMessage(alert, receiver_email, receiver_name, age)
                 # Send Mail
                 check = sendMail(alert, receiver_email, message)  
-                if check == {}:
+                if mailcheck:  
                     df.at[i, "LastSent"] = today
-                    df.at[i, "Mailcount"] = int(df.at[i, "Mailcount"])+1
-                    df.to_csv("Contacts_Testing.csv", index=False, header=True)
+                    df.at[i, "Mailcount"] = int(df.at[i,"Mailcount"])+1
+                    df.to_csv(filepath, index=False, header=True)
                 else:
-                    print("Mail couldn't be sent to: "+ receiver_name + " at: " + receiver_email)
+                    print("Mail was not sent to: ", receiver_name)
 
             else:
                 print("\nThe vaccine is not yet available near", receiver_name)
