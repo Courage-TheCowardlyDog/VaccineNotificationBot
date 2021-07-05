@@ -11,7 +11,7 @@ Code & Related Files:
 * __Contacts.csv__: *Mailing List* Commma Separated Value file which contains: Name, Email, Pincode, AgeGroup, MailLastSent (date), MailCount.  
 * __DataPacketRecieved.json__: Sample data packet received from the website.  
   
-=============================================================================  
+============================================================================  
 Implementation:
 * Created mailing list using google forms (https://forms.gle/u7xxzDsmj2sxgapq7). Automated the export to a CSV to be accessed by the code.  
 * Made a Batch file to run the Python Code, linked the Batch file to a .vbs script to enable it being run in the background.  
